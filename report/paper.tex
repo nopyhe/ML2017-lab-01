@@ -233,7 +233,8 @@ Graduate
 
 % Write abstract here
 \begin{abstract}
-This report show that how to use gradient descent to optimize linear regression and linear classification on small dataset.
+    In this experiment, we use gradient descent to optimize linear regression and linear classification on small dataset. 
+% This report show that how to use gradient descent to optimize linear regression and linear classification on small dataset.
 % The short abstract is intended to give the reader an overview of the experiment. It should be brief and to the point. 
 \end{abstract}
 
@@ -245,7 +246,7 @@ This report show that how to use gradient descent to optimize linear regression 
 The first one requires us to predict the price of house. 
 The second one requires us to distinguish whether or not Australians.
 
-The Motivation of this experiment is let us further understand of linear regression and gradient descent,conduct some experiments under small scale dataset and realize the process of optimization and adjusting parameters.
+The Motivation of this experiment is let us further understand of linear regression and gradient descent, conduct some experiments under small scale dataset, realize the process of optimization and adjusting parameters.
 
 % 这个实验让我们练习线性回归、线性分类、梯度下降，目的是
 % 进一步理解线性回归和梯度下降的原理。
@@ -258,6 +259,7 @@ The Motivation of this experiment is let us further understand of linear regress
 % In this section, you are asked to give a complete introduction to the experiment. For instance, the chosen methods, the related theories, the related equations(loss function), the derivation process(taking the gradient) and so on.
 In this experiment, we use linear regression to predict the price of house and use SVM as linear classifier to distinguish whether or not Australians.
 
+\subsection{Linear Regression}
 In linear regression, the loss function we used is:
 \begin{equation} \label{eq:linear regression loss function}
     J(W,b) = \frac{1}{2m}\sum_{i=1}^m(y_i-(W^Tx_i+b))^2
@@ -265,26 +267,50 @@ In linear regression, the loss function we used is:
 The gradient formulas are:
 \begin{equation} \label{eq:linear regression gradient formula}
     \begin{aligned}
-        fff \\
-        ff
-        % g_w &= X(W^TX+b-Y)\\
-        % g_b &= \frac{1}m\sum_{i=1}^m(W^Tx_i-y_i)
+        \nabla_WJ(W,b)&=\frac{1}{m}\sum_{i=1}^m(y_i-(x_iW+b))x_i\\
+        \nabla_bJ(W,b)&=\frac{1}{m}\sum_{i=1}^m(y_i-(x_iW+b))
     \end{aligned}
 \end{equation}
 
+\subsection{Linear Classification}
 In linear classification, we add hinge loss to our loss function:
 \begin{equation} \label{eq:linear classification loss function}
     J(W,b) = \frac{||W||^2}2+\frac{C}m\sum_{i=1}^{m}max(0,1-y_i(W^Tx_i+b))
 \end{equation}
 The gradient formulas are:
+
 \begin{equation} \label{eq:linear classification gradient formula}
     \begin{aligned}
-        \nabla_WJ(W,b) &= W+\frac{C}m\sum_{i=1}^{m}g_W(x_i)\\
-        \nabla_bJ(W,b) &= \frac{C}m\sum_{i=1}^{m}g_b(x_i)
+        \begin{aligned}
+            g_w(x_i) &= \left\{
+                \begin{aligned} 
+                    & -y_ix_i & &1-y_i(w^Tx_i+b)>=0 \\
+                    & 0 & & 1-y_i(w^Tx_i+b)<0
+                \end{aligned}
+            \right. \\
+            g_b(x_i) &= \left\{
+                \begin{aligned} 
+                    & -y_i & &1-y_i(w^Tx_i+b)>=0 \\
+                    & 0 & & 1-y_i(w^Tx_i+b)<0
+                \end{aligned}
+            \right. 
+        \end{aligned}\\
+        \begin{aligned}
+            \nabla_WJ(W,b) &= W+\frac{C}m\sum_{i=1}^{m}g_w(x_i)\\
+            \nabla_bJ(W,b) &= \frac{C}m\sum_{i=1}^{m}g_b(x_i)
+        \end{aligned}
     \end{aligned}
 \end{equation}
 
-We update both models using below:
+% \begin{equation} \label{eq:linear classification gradient formula}
+%     \begin{aligned}
+%         \nabla_WJ(W,b) &= W+\frac{C}m\sum_{i=1}^{m}g_w(x_i)\\
+%         \nabla_bJ(W,b) &= \frac{C}m\sum_{i=1}^{m}g_b(x_i)
+%     \end{aligned}
+% \end{equation}
+
+
+We update both models using:
 \begin{equation} \label{eq:update parameters formula}
     \begin{aligned}
         W&=W-\alpha \nabla_WJ(W,b)\\
@@ -337,9 +363,9 @@ I also convert data to column vector.
 
 \subsubsection{Initialization}
 There are many ways to initialize linear model parameters.
-I choose to set all parameter into zero.
+I choose to set all parameters into zero.
 % 有多种方法初始化参数，在这里，我们使用零初初始化参数W,b。
-% Initialize linear model parameters. You can choose to set all parameter into zero, initialize it randomly or with normal distribution.
+% Initialize linear model parameters. You can choose to set all parameters into zero, initialize it randomly or with normal distribution.
 \subsubsection{Compute Loss and Gradient} \label{compute loss and gradient}
 In linear regression, use formula \eqref{eq:linear regression loss function} to compute loss and formula \eqref{eq:linear regression gradient formula} to compute gradient.
 In linear classification, use formula \eqref{eq:linear classification loss function} to compute loss and formula \eqref{eq:linear classification gradient formula} to compute gradient.
@@ -371,14 +397,15 @@ Repeat step 3 and 4 until reach the end condition. Get trian loss and validation
 % repeat step \ref{xxxx} to 8
 
 \subsubsection{Implementation Code}
-The linear regression code is:
-
+I use a function to initialize parameters with zeros:
 \begin{lstlisting}[language=Python]
     def init_parameters_with_zeros(dim):
         W = np.zeros((dim, 1))
         b = 0
         return W, b
-
+\end{lstlisting}
+In linear regression, I use this function to compute cost and gradient:
+\begin{lstlisting}[language=Python]
     def propagate(W, b, X, Y):
         m = X.shape[1]
         A = np.dot(W.T, X) + b
@@ -386,7 +413,9 @@ The linear regression code is:
         gW = np.dot(X, (A - Y).T) * 2 / m
         gb = np.sum(2 * (A - Y)) / m
         return cost, gW, gb
-
+\end{lstlisting}
+And this function to train model:
+\begin{lstlisting}[language=Python]
     def model(X_train, Y_train, X_val, Y_val, num_iterations=500, learning_rate=0.01, print_cost=False):
         train_cost_log = []
         val_cost_log = []
@@ -406,13 +435,8 @@ The linear regression code is:
 
 The linear classification code is very similar to the linear regression code except loss function and gradient function.
 Moreover, we can compute predict accuracy in linear classification.
-
+Use this function to compute cost and gradient:
 \begin{lstlisting}[language=Python]
-    def init_parameters_with_zeros(dim):
-        W = np.zeros((dim, 1))
-        b = 0
-        return W, b
-
     def propagate(W, b, X, Y):
         C = 0.9
         A = np.dot(W.T, X) + b
@@ -421,7 +445,9 @@ Moreover, we can compute predict accuracy in linear classification.
         gW = W - C * np.dot(Y * filt, X.T).T / m
         gb = -C * np.sum(Y * filt * b) / m
         return cost, gW, gb
-
+\end{lstlisting}
+Use this function to predict:
+\begin{lstlisting}[language=Python]
     def predict(W, b, X):
         m = X.shape[1]
         A = np.dot(W.T, X) + b
@@ -429,7 +455,9 @@ Moreover, we can compute predict accuracy in linear classification.
         Y_prediction[A >= 0] = 1
         Y_prediction[A < 0] = -1
         return Y_prediction
-
+\end{lstlisting}
+And use this function to train model:
+\begin{lstlisting}[language=Python]
     def model(X_train, Y_train, X_val, Y_val, num_iterations=200, learning_rate=0.01, print_cost=False):
         m = X_train.shape[0]
         train_cost_log = []
@@ -460,7 +488,7 @@ Moreover, we can compute predict accuracy in linear classification.
 \subsubsection{Result}
 
 In Linear regression, I record the loss for each iteration. 
-From the Fig.~\ref{fig:linear_regression_loss} we can see that, both trian loss and validation loss decrease as the number of iterations increases.
+From the Fig.~\ref{fig:linear_regression_loss} we can find that, both train loss and validation loss decrease as the number of iterations increases.
 As the number of iterations increases, the loss function changes slowly.
 
 \begin{figure}[!hbt]
@@ -594,7 +622,7 @@ From the Fig.~\ref{fig:linear_classification_loss_with_different_learning_rate} 
 \section{Conclusion}
 
 	% This section summarizes the paper. In our experiments, you can also write your gains and inspirations in here.
-    Through this experiment, I learned how to solve problems using linear regression and linear classification, and learned how to use gradient descent to optimize the model. I learned that learning rate is an important hyperparameter, and if the learning rate is too large or too small, we can not get a good model.
+    Through this experiment, I learned how to solve problems using linear regression and linear classification, and learned how to use gradient descent to optimize the model. I learned how to adjusting hyperparameter. I learned that learning rate is an important hyperparameter, and if the learning rate is too large or too small, we can not get a good model.
 
 
 % Your document ends here!
